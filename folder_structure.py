@@ -1,5 +1,20 @@
 import os
 import json
+from PIL import Image
+from pydub import AudioSegment
+from moviepy.editor import VideoFileClip
+
+def obtener_informacion_imagen(ruta_archivo):
+    imagen = Image.open(ruta_archivo)
+    return imagen.size
+
+def obtener_calidad_audio(ruta_archivo):
+    audio = AudioSegment.from_file(ruta_archivo)
+    return audio.frame_rate
+
+def obtener_calidad_video(ruta_archivo):
+    video = VideoFileClip(ruta_archivo)
+    return video.size
 
 def generar_estructura_carpeta(carpeta_path):
     estructura = {}
@@ -20,8 +35,32 @@ def generar_estructura_carpeta(carpeta_path):
     
     # Agregar los archivos y carpetas a la estructura
     estructura['nombre'] = nombre_carpeta
-    estructura['archivos'] = archivos
+    estructura['archivos'] = []
     estructura['carpetas'] = []
+    
+    for archivo in archivos:
+        ruta_archivo = os.path.join(carpeta_path, archivo)
+        
+        # Obtener información adicional según el tipo de archivo
+        tipo_archivo = archivo.split('.')[-1].lower()
+        informacion_adicional = {}
+        
+        if tipo_archivo in ['jpg', 'jpeg', 'png', 'gif']:
+            informacion_adicional['tipo'] = 'imagen'
+            informacion_adicional['resolucion'] = obtener_informacion_imagen(ruta_archivo)
+        elif tipo_archivo in ['mp3', 'flac', 'wav', 'alac']:
+            informacion_adicional['tipo'] = 'audio'
+            informacion_adicional['calidad_audio'] = obtener_calidad_audio(ruta_archivo)
+        elif tipo_archivo in ['mp4', 'mkv', 'avi']:
+            informacion_adicional['tipo'] = 'video'
+            informacion_adicional['calidad_video'] = obtener_calidad_video(ruta_archivo)
+        
+        archivo_info = {
+            'nombre': archivo,
+            'informacion_adicional': informacion_adicional
+        }
+        
+        estructura['archivos'].append(archivo_info)
     
     for subcarpeta in carpetas:
         ruta_subcarpeta = os.path.join(carpeta_path, subcarpeta)
