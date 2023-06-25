@@ -1,7 +1,7 @@
 import os
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
 from ui_mainwindow import Ui_MainWindow
-from folder_structure import guardar_estructura_carpeta_en_json
+from folder_structure import guardar_estructura_carpeta_en_json, guardar_estructura_carpeta_en_txt
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -21,6 +21,15 @@ class MainWindow(QMainWindow):
 
     def generar_estructura(self):
         carpeta = self.ui.lineEditCarpeta.text()
-        nombre_archivo = os.path.join(os.path.dirname(os.path.abspath(__file__)), "estructura_carpeta.json")
-        guardar_estructura_carpeta_en_json(carpeta, nombre_archivo)
+        nombre_carpeta = os.path.basename(carpeta)
+        ruta_proyecto = os.path.dirname(os.path.abspath(__file__))
+        formato_seleccionado = self.ui.comboBoxTipoSalida.currentText()
+
+        if formato_seleccionado == ".json":
+            nombre_archivo = os.path.join(ruta_proyecto, nombre_carpeta + "_estructura.json")
+            guardar_estructura_carpeta_en_json(carpeta, nombre_archivo)
+        elif formato_seleccionado == ".txt":
+            nombre_archivo = os.path.join(ruta_proyecto, nombre_carpeta + "_estructura.txt")
+            guardar_estructura_carpeta_en_txt(carpeta, nombre_archivo)
+
         self.ui.statusbar.showMessage("Estructura generada y guardada correctamente.", 3000)

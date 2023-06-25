@@ -35,6 +35,12 @@ class Ui_MainWindow(object):
         self.lineEditCarpeta.setObjectName("lineEditCarpeta")
         self.lineEditCarpeta.setReadOnly(True)
 
+        self.comboBoxTipoSalida = QtWidgets.QComboBox(self.centralwidget)
+        self.comboBoxTipoSalida.setGeometry(QtCore.QRect(167, 50, 150, 30))
+        self.comboBoxTipoSalida.setObjectName("comboBoxTipoSalida")
+        self.comboBoxTipoSalida.addItem(".json")
+        self.comboBoxTipoSalida.addItem(".txt")
+
         self.btnSeleccionarCarpeta = QtWidgets.QPushButton(self.centralwidget)
         self.btnSeleccionarCarpeta.setGeometry(QtCore.QRect(167, 100, 150, 30))
         self.btnSeleccionarCarpeta.setObjectName("btnSeleccionarCarpeta")

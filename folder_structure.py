@@ -34,3 +34,9 @@ def guardar_estructura_carpeta_en_json(carpeta_path, nombre_archivo):
     
     with open(nombre_archivo, 'w') as archivo_json:
         json.dump(estructura, archivo_json, indent=4)
+
+def guardar_estructura_carpeta_en_txt(carpeta_path, nombre_archivo):
+    estructura = generar_estructura_carpeta(carpeta_path)
+    
+    with open(nombre_archivo, 'w') as archivo_txt:
+        archivo_txt.write(json.dumps(estructura, indent=4))
