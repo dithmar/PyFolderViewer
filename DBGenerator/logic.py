@@ -2,18 +2,18 @@ import json
 
 def generate_sql_code(data):
     sql_code = ""
-    
+
     # Obtener el nombre de la carpeta principal
     nombre_db = data["nombre"]
-    
+
     # Crear la sentencia CREATE DATABASE
     create_db_statement = f"CREATE DATABASE {nombre_db};\n"
     sql_code += create_db_statement
-    
+
     # Generar sentencia USE DATABASE
     use_db_statement = f"USE {nombre_db};\n\n"
     sql_code += use_db_statement
-    
+
     # Definir formatos y tablas por formato
     formatos = {
         "audio": {
@@ -29,73 +29,98 @@ def generate_sql_code(data):
 
     table_statements = set()
     insert_statements = {}
-    columnas_varchar = [
-        "nombre_musica", "nombre_video", "nombre_imagen", "nombre_archivo", "formato_archivo", "resolucion_imagen"
-    ]  # Columnas que serán del tipo VARCHAR(255)
+    columnas = {
+        "audio": [
+            "nombre_musica", "formato_archivo", "calidad_audio"
+        ],
+        "video": [
+            "nombre_video", "formato_archivo", "calidad_video"
+        ],
+        "imagen": [
+            "nombre_imagen", "formato_archivo", "resolucion_imagen"
+        ],
+        "documentos": [
+            "nombre_archivo", "formato_archivo"
+        ]
+    }
+
+    columnas_tipo = {
+        "audio": [
+            "nombre_musica VARCHAR(255)",
+            "formato_archivo VARCHAR(255)",
+            "calidad_audio VARCHAR(255)"
+        ],
+        "video": [
+            "nombre_video VARCHAR(255)",
+            "formato_archivo VARCHAR(255)",
+            "calidad_video VARCHAR(255)"
+        ],
+        "imagen": [
+            "nombre_imagen VARCHAR(255)",
+            "formato_archivo VARCHAR(255)",
+            "resolucion_imagen VARCHAR(255)"
+        ],
+        "documentos": [
+            "nombre_archivo VARCHAR(255)",
+            "formato_archivo VARCHAR(255)"
+        ]
+    }
 
     for carpeta in data["carpetas"]:
         archivos = carpeta["archivos"]
         for archivo in archivos:
             nombre_archivo, formato_archivo = archivo["nombre"].split(".")
             informacion_adicional = archivo["informacion_adicional"]
-            tipo_archivo = informacion_adicional.get("tipo", "documento")
-            
+            tipo_archivo = informacion_adicional.get("tipo", "documentos")
+
             if tipo_archivo in formatos:
                 formatos_extensiones = formatos[tipo_archivo]
                 if formato_archivo.lower() in formatos_extensiones:
                     if tipo_archivo == "audio":
                         table_name = "archivos_audio"
-                        columns = "nombre_musica, formato_archivo, calidad_audio VARCHAR(255)"
-                        additional_info = str(informacion_adicional.get("calidad_audio", "NULL"))
                     elif tipo_archivo == "video":
                         table_name = "archivos_video"
-                        columns = "nombre_video, formato_archivo, calidad_video VARCHAR(255)"
-                        additional_info = str(informacion_adicional.get("calidad_video", "NULL"))
                     elif tipo_archivo == "imagen":
                         table_name = "archivos_imagen"
-                        columns = "nombre_imagen, formato_archivo, resolucion_imagen VARCHAR(255)"
-                        additional_info = str(informacion_adicional.get("resolucion", "NULL"))
-                    
+                    else:
+                        continue
+
                     if table_name not in table_statements:
                         table_statements.add(table_name)
-                        
-                        create_table_columns = ", ".join(
-                            [f"{column} VARCHAR(255)" if column in columnas_varchar else column for column in columns.split(", ")]
-                        )
-                        create_table_statement = f"CREATE TABLE {table_name} (id INT PRIMARY KEY AUTO_INCREMENT, {create_table_columns});\n"
+
+                        columns = ",\n".join([f"{column} {tipo}" for column, tipo in zip(columnas[tipo_archivo], columnas_tipo[tipo_archivo])])
+                        create_table_statement = f"CREATE TABLE {table_name} (\nid INT PRIMARY KEY AUTO_INCREMENT, \n{columns}\n);\n"
                         sql_code += create_table_statement
-                    
+
                     if table_name not in insert_statements:
                         insert_statements[table_name] = []
-                    
-                    values = f'("{nombre_archivo}", "{formato_archivo}", "{additional_info}")'
-                    insert_statements[table_name].append(values)
-            
+
+                    values = ', '.join(f'"{value}"' for value in [nombre_archivo, formato_archivo] + list(informacion_adicional.values()))
+                    insert_statements[table_name].append(f'({values})')
+
             else:
                 table_name = "archivos_documentos"
-                columns = "nombre_archivo, formato_archivo"
-                
+
                 if table_name not in table_statements:
                     table_statements.add(table_name)
-                    
-                    create_table_columns = ", ".join(
-                        [f"{column} VARCHAR(255)" if column in columnas_varchar else column for column in columns.split(", ")]
-                    )
-                    create_table_statement = f"CREATE TABLE {table_name} (id INT PRIMARY KEY AUTO_INCREMENT, {create_table_columns});\n"
+
+                    columns = ",\n".join([f"{column} {tipo}" for column, tipo in zip(columnas[tipo_archivo], columnas_tipo[tipo_archivo])])
+                    create_table_statement = f"CREATE TABLE {table_name} (\nid INT PRIMARY KEY AUTO_INCREMENT, \n{columns}\n);\n"
                     sql_code += create_table_statement
-                
+
                 if table_name not in insert_statements:
                     insert_statements[table_name] = []
-                
-                insert_statements[table_name].append(f'("{nombre_archivo}", "{formato_archivo}")')
-    
+
+                values = ', '.join(f'"{value}"' for value in [nombre_archivo, formato_archivo])
+                insert_statements[table_name].append(f'({values})')
+
     # Generar sentencias INSERT INTO
     for table_name, values in insert_statements.items():
-        columns = table_name.replace("archivos_", "nombre_")
+        columns = ", ".join(columnas[table_name.replace("archivos_", "")])
         values_str = ",\n".join(values)
-        insert_statement = f"\nINSERT INTO {table_name} ({columns}, formato_archivo, resolucion_imagen) VALUES {values_str};\n"
+        insert_statement = f"\nINSERT INTO {table_name} (\n{columns}\n) VALUES \n{values_str};\n"
         sql_code += insert_statement
-    
+
     return sql_code
 
 def import_json(json_file_path):
