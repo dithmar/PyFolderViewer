@@ -37,31 +37,42 @@ def generate_sql_code(data):
             
             for tipo_formato, formatos_extensiones in formatos.items():
                 if formato_archivo.lower() in formatos_extensiones:
-                    table_name = f"archivos_{tipo_formato}"
+                    if tipo_formato == "audio":
+                        table_name = "archivos_audio"
+                        columns = "nombre_musica, formato_archivo"
+                    elif tipo_formato == "video":
+                        table_name = "archivos_video"
+                        columns = "nombre_video, formato_archivo"
+                    elif tipo_formato == "imagen":
+                        table_name = "archivos_imagen"
+                        columns = "nombre_imagen, formato_archivo, resolucion_imagen"
                     
                     if table_name not in table_statements:
                         table_statements.add(table_name)
                         
-                        columns = "id INT, nombre_archivo VARCHAR(255), formato_archivo VARCHAR(255)"
-                        create_table_statement = f"CREATE TABLE {table_name} ({columns});\n"
+                        create_table_statement = f"CREATE TABLE {table_name} (id INT PRIMARY KEY AUTO_INCREMENT, {columns});\n"
                         sql_code += create_table_statement
                     
                     if table_name not in insert_statements:
                         insert_statements[table_name] = []
                     
                     # Modificar las comillas en los valores de inserción
-                    insert_statements[table_name].append(f'("{nombre_archivo}", "{formato_archivo}")')
+                    if tipo_formato == "imagen":
+                        values = f'("{nombre_archivo}", "{formato_archivo}", NULL)'
+                    else:
+                        values = f'("{nombre_archivo}", "{formato_archivo}")'
+                    insert_statements[table_name].append(values)
                     break
             
             # Si el formato no coincide con ninguno, se asume archivos_documentos
             else:
                 table_name = "archivos_documentos"
+                columns = "nombre_archivo, formato_archivo"
                 
                 if table_name not in table_statements:
                     table_statements.add(table_name)
                     
-                    columns = "id INT, nombre_archivo VARCHAR(255), formato_archivo VARCHAR(255)"
-                    create_table_statement = f"CREATE TABLE {table_name} ({columns});\n"
+                    create_table_statement = f"CREATE TABLE {table_name} (id INT PRIMARY KEY AUTO_INCREMENT, {columns});\n"
                     sql_code += create_table_statement
                 
                 if table_name not in insert_statements:
@@ -72,15 +83,16 @@ def generate_sql_code(data):
     
     # Generar sentencias INSERT INTO
     for table_name, values in insert_statements.items():
+        columns = table_name.replace("archivos_", "nombre_")
         values_str = ",\n".join(values)
-        insert_statement = f"\nINSERT INTO {table_name} (nombre_archivo, formato_archivo) VALUES {values_str};\n"
+        insert_statement = f"\nINSERT INTO {table_name} ({columns}, formato_archivo, resolucion_imagen) VALUES {values_str};\n"
         sql_code += insert_statement
         
     return sql_code
 
 
 # Cargar los datos desde el archivo JSON
-with open("Archivos_variados_estructura.json") as json_file:
+with open("E&Y_estructura.json") as json_file:
     data = json.load(json_file)
 
 # Obtener el nombre de la base de datos
@@ -97,4 +109,3 @@ with open(nombre_archivo, "w") as sql_file:
     sql_file.write(sql_code)
 
 print(f"Código SQL generado y guardado en '{nombre_archivo}'")
-
