@@ -389,7 +389,7 @@ def import_json(json_file_path, database):
             data = json.load(json_file)
             nombre_db = data["nombre"]
             sql_code = generate_sql_code(data, database)
-            
+
             if database == "MySQL":
                 codigo_tipo = "mysql"
             elif database == "PostgreSQL":
@@ -403,6 +403,10 @@ def import_json(json_file_path, database):
 
             with open(nombre_archivo, "w") as sql_file:
                 sql_file.write(sql_code)
-            print(f"Código SQL generado y guardado en '{nombre_archivo}' para la base de datos '{database}'")
+
+            return sql_code, nombre_archivo
+
         except Exception as e:
             print(f"Error al cargar el archivo JSON: {str(e)}")
+            return None, None
+
