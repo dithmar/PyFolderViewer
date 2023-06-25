@@ -1,7 +1,10 @@
 import os
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
 from ui_mainwindow import Ui_MainWindow
-from folder_structure import guardar_estructura_carpeta_en_json, guardar_estructura_carpeta_en_txt
+from folder_structure import (
+    guardar_estructura_carpeta_en_json,
+    guardar_estructura_carpeta_en_txt,
+)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -25,11 +28,26 @@ class MainWindow(QMainWindow):
         ruta_proyecto = os.path.dirname(os.path.abspath(__file__))
         formato_seleccionado = self.ui.comboBoxTipoSalida.currentText()
 
+        # Obtener la extensión del formato seleccionado
         if formato_seleccionado == ".json":
-            nombre_archivo = os.path.join(ruta_proyecto, nombre_carpeta + "_estructura.json")
+            extension = "json"
+        elif formato_seleccionado == ".txt":
+            extension = "txt"
+        else:
+            return
+
+        # Generar un nombre único para el archivo
+        contador = 1
+        nombre_archivo = os.path.join(ruta_proyecto, f"{nombre_carpeta}_estructura.{extension}")
+        nombre_base = nombre_archivo
+        while os.path.exists(nombre_archivo):
+            nombre_archivo = f"{nombre_base[:-len(extension)-1]}({contador}).{extension}"
+            contador += 1
+
+        # Guardar la estructura en el archivo correspondiente
+        if formato_seleccionado == ".json":
             guardar_estructura_carpeta_en_json(carpeta, nombre_archivo)
         elif formato_seleccionado == ".txt":
-            nombre_archivo = os.path.join(ruta_proyecto, nombre_carpeta + "_estructura.txt")
             guardar_estructura_carpeta_en_txt(carpeta, nombre_archivo)
 
         self.ui.statusbar.showMessage("Estructura generada y guardada correctamente.", 3000)
