@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QLabel, QLineEdit, QPushButton, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QLabel, QLineEdit, QPushButton, QFileDialog, QComboBox
 from PyQt5 import QtCore
 
 class MainWindow(QMainWindow):
@@ -6,7 +6,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Generador de código SQL")
-        self.resize(300, 150)
+        self.resize(300, 180)
 
         layout = QVBoxLayout()
 
@@ -33,6 +33,11 @@ class MainWindow(QMainWindow):
         )
         layout.addWidget(self.import_button)
 
+        self.combo_box = QComboBox()
+        self.combo_box.addItems(["MySQL", "TransactSQL", "PostgreSQL"])
+        layout.addWidget(QLabel("Tipo de base de datos:"))
+        layout.addWidget(self.combo_box)
+
         self.generate_button = QPushButton("Generar código SQL")
         self.generate_button.setStyleSheet(
             """
@@ -56,8 +61,7 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(widget)
 
-        self.generate_button.clicked.connect(self.generate_sql)
-
+        self.generate_button.clicked.connect(self.get_data)
 
     def import_json(self):
         file_dialog = QFileDialog()
@@ -67,14 +71,9 @@ class MainWindow(QMainWindow):
 
     def get_json_file_path(self):
         return self.json_input.text()
-    
-    def get_data(self):
-        data = {
-            "nombre": self.json_input.text(),
-            "carpetas": []  # Agrega aquí los datos correspondientes a las carpetas
-            # Agrega aquí los demás datos necesarios para generar el código SQL
-        }
-        return data
 
-    def generate_sql(self):  # Agregar la función generate_sql
-        pass 
+    def get_selected_database(self):
+        return self.combo_box.currentText()
+
+    def get_data(self):
+        pass
