@@ -21,8 +21,22 @@ class Ui_MainWindow(object):
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
 
+        self.labelRuta = QtWidgets.QLabel(self.centralwidget)
+        self.labelRuta.setGeometry(QtCore.QRect(10, 10, 151, 30))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(12)
+        self.labelRuta.setFont(font)
+        self.labelRuta.setObjectName("labelRuta")
+        self.labelRuta.setText("Ruta de la carpeta:")
+
+        self.lineEditCarpeta = QtWidgets.QLineEdit(self.centralwidget)
+        self.lineEditCarpeta.setGeometry(QtCore.QRect(167, 10, 400, 30))
+        self.lineEditCarpeta.setObjectName("lineEditCarpeta")
+        self.lineEditCarpeta.setReadOnly(True)
+
         self.btnSeleccionarCarpeta = QtWidgets.QPushButton(self.centralwidget)
-        self.btnSeleccionarCarpeta.setGeometry(QtCore.QRect(10, 10, 150, 30))
+        self.btnSeleccionarCarpeta.setGeometry(QtCore.QRect(167, 100, 150, 30))
         self.btnSeleccionarCarpeta.setObjectName("btnSeleccionarCarpeta")
 
         self.btnSeleccionarCarpeta.setStyleSheet("""
@@ -42,7 +56,7 @@ class Ui_MainWindow(object):
         """)
 
         self.btnGenerarEstructura = QtWidgets.QPushButton(self.centralwidget)
-        self.btnGenerarEstructura.setGeometry(QtCore.QRect(10, 50, 150, 30))
+        self.btnGenerarEstructura.setGeometry(QtCore.QRect(327, 100, 150, 30))
         self.btnGenerarEstructura.setObjectName("btnGenerarEstructura")
 
         self.btnGenerarEstructura.setStyleSheet("""
@@ -60,11 +74,6 @@ class Ui_MainWindow(object):
                 background-color: #1976a9;
             }
         """)
-
-        self.lineEditCarpeta = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineEditCarpeta.setGeometry(QtCore.QRect(167, 10, 400, 30))
-        self.lineEditCarpeta.setObjectName("lineEditCarpeta")
-        self.lineEditCarpeta.setReadOnly(True)
 
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
